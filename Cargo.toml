@@ -1,0 +1,19 @@
+[workspace]
+members = ["storybook"]
+
+[package]
+name = "vertigo-graphs"
+version = "0.1.0"
+authors = ["Michał Pokrywka <wolfmoon@o2.pl>"]
+description = "Building blocks for SVG graphs in vertigo"
+readme = "README.md"
+keywords = ["wasm", "web", "isomorphic", "reactive", "javascript"]
+homepage = "https://vertigo.znoj.pl"
+repository = "https://github.com/vertigo-web/vertigo-graphs"
+documentation = "https://docs.rs/vertigo-graphs/"
+categories = ["asynchronous", "gui", "wasm", "web-programming", "visualization"]
+license = "MIT OR Apache-2.0"
+edition = "2024"
+
+[dependencies]
+vertigo = "0.11"

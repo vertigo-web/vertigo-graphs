@@ -17,3 +17,7 @@ edition = "2024"
 
 [dependencies]
 vertigo = "0.11"
+
+[patch.crates-io]
+vertigo = { git = "https://github.com/vertigo-web/vertigo", branch = "master" }
+#vertigo = { path = "../vertigo/crates/vertigo" }

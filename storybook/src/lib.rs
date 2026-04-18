@@ -1,78 +1,85 @@
 use std::rc::Rc;
-use vertigo::{Computed, DomNode, Value, bind, bind_spawn, dev::ValueMut, dom, get_driver, main};
-use vertigo_graphs::{Graph, GraphData};
+
+use vertigo::{DomNode, css, dom, main, router::Router};
+use vertigo_forms::{Tab, Tabs, TabsParams};
+
+mod route;
+mod tab_1_simple;
+mod tab_2_animated;
+mod tab_3_built;
+mod tab_4_rounded;
+mod tab_5_bar;
+mod tab_6_fill_gradient;
+
+use route::Route;
 
 #[main]
 fn app() -> DomNode {
-    let state = State::default();
+    let current_tab = Router::<Route>::new_history_router();
 
-    let data = GraphData {
-        label: Computed::from(|_| "Graph".to_string()),
-        scale_x: Computed::from(|_| 100.0),
-        scale_y: Computed::from(|_| 100.0),
-        points: bind!(
-            state,
-            Computed::from(move |ctx| {
-                let progress = (state.progress.get(ctx) as f64) / 100.0;
-                let sine = progress.sin() * 100.0;
-                let cosine = progress.cos() * 60.0;
-                let tangent = progress.tan() * 100.0;
-                let arc_sine = progress.asin() * 60.0;
-                let arc_cosine = progress.acos() * 60.0;
-                let arc_tangent = progress.atan() * 100.0;
-
-                vec![
-                    (0.0, sine),
-                    (20.0, cosine),
-                    (40.0, tangent),
-                    (60.0, arc_sine),
-                    (80.0, arc_cosine),
-                    (100.0, arc_tangent),
-                ]
-            })
-        ),
-    };
-
-    let on_click = bind_spawn!(state, |_| async move {
-        state.start_animation().await;
-    });
+    let tabs = vec![
+        Tab {
+            key: Route::Simple,
+            name: "Simple".to_string(),
+            render: Rc::new(|_: &Route| tab_1_simple::render()),
+        },
+        Tab {
+            key: Route::Animated,
+            name: "Animated".to_string(),
+            render: Rc::new(|_: &Route| tab_2_animated::render()),
+        },
+        Tab {
+            key: Route::Built,
+            name: "Built".to_string(),
+            render: Rc::new(|_: &Route| tab_3_built::render()),
+        },
+        Tab {
+            key: Route::Rounded,
+            name: "Rounded".to_string(),
+            render: Rc::new(|_: &Route| tab_4_rounded::render()),
+        },
+        Tab {
+            key: Route::Bar,
+            name: "Bar".to_string(),
+            render: Rc::new(|_: &Route| tab_5_bar::render()),
+        },
+        Tab {
+            key: Route::FillGradient,
+            name: "Fill Gradient".to_string(),
+            render: Rc::new(|_: &Route| tab_6_fill_gradient::render()),
+        },
+    ];
 
     dom! {
         <html>
             <head />
             <body>
-                <Graph data={data} />
-                <button {on_click}>"Start"</button>
-                <p>{state.progress}</p>
+                <Tabs
+                    {&current_tab}
+                    {tabs}
+                    params={bordered_tabs()}
+                />
             </body>
         </html>
     }
 }
 
-#[derive(Clone, Default)]
-pub struct State {
-    pub progress: Value<u32>,
-    in_progress: Rc<ValueMut<bool>>,
-}
-
-impl State {
-    pub async fn start_animation(self) {
-        if self.in_progress.get() {
-            return;
-        }
-
-        self.in_progress.set(true);
-
-        for i in 0..100 {
-            self.progress.set(i as u32);
-            get_driver().sleep(20).await;
-        }
-
-        for i in (0..100).rev() {
-            self.progress.set(i as u32);
-            get_driver().sleep(10).await;
-        }
-
-        self.in_progress.set(false);
+pub fn bordered_tabs() -> TabsParams {
+    TabsParams {
+        header_item_add_css: css! {"
+            border: 1px solid black;
+            padding: 0px 10px;
+        "},
+        header_active_item_add_css: css! {"
+            background-color: lightgray;
+        "},
+        content_css: css! {"
+            border: solid 1px black;
+            padding: 5px 10px;
+        "},
+        container_css: css! {"
+            margin: 10px;
+        "},
+        ..Default::default()
     }
 }

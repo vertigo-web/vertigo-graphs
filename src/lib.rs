@@ -1,30 +1,23 @@
-use vertigo::{Computed, component, computed_tuple, dom};
+pub mod bar;
+pub mod chart_container;
+pub mod fill_gradient;
+pub mod graph;
+pub mod grid;
+pub mod legend;
+pub mod line;
+pub mod tooltip;
+pub mod types;
+pub mod x_axis;
+pub mod y_axis;
 
-pub struct GraphData {
-    pub label: Computed<String>,
-    pub scale_x: Computed<f64>,
-    pub scale_y: Computed<f64>,
-    pub points: Computed<Vec<(f64, f64)>>,
-}
-
-#[component]
-pub fn Graph(data: GraphData) {
-    let path = computed_tuple!(points => &data.points, scale_y => &data.scale_y).map(
-        |(points, height)| {
-            let mut path = String::new();
-            for (i, (x, y)) in points.iter().enumerate() {
-                let cmd = if i == 0 { 'M' } else { 'L' };
-                path.push_str(&format!("{}{},{} ", cmd, x, height - y));
-            }
-            path
-        },
-    );
-    dom! {
-        <div>
-            <p>{data.label}</p>
-            <svg width={data.scale_x} height={data.scale_y} style="border: 1px solid #ccc">
-                <path d={path} fill="none" stroke="black" stroke-width="2" />
-            </svg>
-        </div>
-    }
-}
+pub use bar::*;
+pub use chart_container::*;
+pub use fill_gradient::*;
+pub use graph::*;
+pub use grid::*;
+pub use legend::*;
+pub use line::*;
+pub use tooltip::*;
+pub use types::*;
+pub use x_axis::*;
+pub use y_axis::*;

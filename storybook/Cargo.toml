@@ -9,4 +9,5 @@ crate-type = ["cdylib"]
 
 [dependencies]
 vertigo = "0.11"
+vertigo-forms = "0.1"
 vertigo-graphs = { path = ".." }

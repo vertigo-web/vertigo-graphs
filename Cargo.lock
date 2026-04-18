@@ -518,13 +518,23 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 
 [[package]]
 name = "vertigo"
-version = "0.11.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0aa34d8d831b3cdb14fa67530a53d3741e055e363a19d6bac48288b3c0740f28"
+version = "0.11.4"
+source = "git+https://github.com/vertigo-web/vertigo?branch=master#a16511b7f57738c6593bf23d321f8f8bbc98bc9b"
 dependencies = [
  "base64",
  "log",
  "vertigo-macro",
+]
+
+[[package]]
+name = "vertigo-forms"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e6334d600f0bdd4e54be002950b39d36eef4a342d0512e164ca453da1a5de18b"
+dependencies = [
+ "base64",
+ "either",
+ "vertigo",
 ]
 
 [[package]]
@@ -539,14 +549,14 @@ name = "vertigo-graphs-storybook"
 version = "0.1.0"
 dependencies = [
  "vertigo",
+ "vertigo-forms",
  "vertigo-graphs",
 ]
 
 [[package]]
 name = "vertigo-macro"
-version = "0.11.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "765b27859ad0eb9ca69d6ef10129400d4ff229fdd1ec4a33ad291bd703f4d41a"
+version = "0.11.4"
+source = "git+https://github.com/vertigo-web/vertigo?branch=master#a16511b7f57738c6593bf23d321f8f8bbc98bc9b"
 dependencies = [
  "base64",
  "crc",

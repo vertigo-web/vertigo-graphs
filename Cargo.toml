@@ -16,8 +16,10 @@ license = "MIT OR Apache-2.0"
 edition = "2024"
 
 [dependencies]
-vertigo = "0.11"
+vertigo = "0.13"
 
-[patch.crates-io]
-vertigo = { git = "https://github.com/vertigo-web/vertigo", branch = "master" }
-#vertigo = { path = "../vertigo/crates/vertigo" }
+# [patch.crates-io]
+# vertigo = { git = "https://github.com/vertigo-web/vertigo", branch = "prepare-0.13.0" }
+# vertigo-forms = { git = "https://github.com/vertigo-web/vertigo-forms", branch = "prepare-0.2.1" }
+# vertigo = { path = "../vertigo/crates/vertigo" }
+# vertigo-forms = { path = "../vertigo-forms" }

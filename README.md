@@ -5,7 +5,7 @@ Blocks for building graphs in [vertigo](https://crates.io/crates/vertigo).
 [![crates.io](https://img.shields.io/crates/v/vertigo-graphs)](https://crates.io/crates/vertigo-graphs)
 [![Documentation](https://docs.rs/vertigo-graphs/badge.svg)](https://docs.rs/vertigo-graphs)
 ![MIT or Apache 2.0 licensed](https://img.shields.io/crates/l/vertigo-graphs.svg)
-[![Dependency Status](https://deps.rs/crate/vertigo-graphs/0.1.3/status.svg)](https://deps.rs/crate/vertigo-graphs/0.1.3)
+[![Dependency Status](https://deps.rs/crate/vertigo-graphs/0.1.0/status.svg)](https://deps.rs/crate/vertigo-graphs/0.1.0)
 [![CI](https://github.com/vertigo-web/vertigo-graphs/actions/workflows/pipeline.yaml/badge.svg)](https://github.com/vertigo-web/vertigo-graphs/actions/workflows/pipeline.yaml)
 [![downloads](https://img.shields.io/crates/d/vertigo-graphs.svg)](https://crates.io/crates/vertigo-graphs)
 
@@ -16,7 +16,7 @@ See [Changelog](https://github.com/vertigo-web/vertigo-graphs/blob/master/CHANGE
 Dependencies:
 
 ```toml
-vertigo = "0.11"
+vertigo = "0.13"
 vertigo-graphs = "0.1"
 ```
 

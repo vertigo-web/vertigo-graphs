@@ -1,5 +1,5 @@
 use vertigo::{Computed, DomNode, dom};
-use vertigo_graphs::{Bar, BarKind, ChartContainer, GraphData, Grid, XAxis, YAxis};
+use vertigo_graphs::{Bar, BarKind, BarParams, ChartContainer, GraphData, Grid, XAxis, YAxis};
 
 pub fn render() -> DomNode {
     let data = GraphData {
@@ -19,11 +19,11 @@ pub fn render() -> DomNode {
     };
 
     dom! {
-        <ChartContainer {&data} padding_x={} padding_y={} background={}>
-            <Grid {&data} kind={} stroke={} />
-            <XAxis {&data} stroke={} />
-            <YAxis {&data} stroke={} values={} decimals={} value_scale={} labels_only={} />
-            <Bar {&data} kind={BarKind::Rounded(15.0)} />
+        <ChartContainer {&data} params={}>
+            <Grid {&data} params={} />
+            <XAxis {&data} params={} />
+            <YAxis {&data} params={} />
+            <Bar {&data} params={BarParams { kind: BarKind::Rounded(15.0) }} />
         </ChartContainer>
     }
 }

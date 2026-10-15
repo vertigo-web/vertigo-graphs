@@ -19,11 +19,11 @@ pub fn render() -> DomNode {
     };
 
     dom! {
-        <ChartContainer {&data} padding_x={} padding_y={} background={}>
-            <Grid {&data} kind={} stroke={} />
-            <XAxis {&data} stroke={} />
-            <YAxis {&data} stroke={} values={} decimals={} value_scale={} labels_only={} />
-            <Line {&data} color={} kind={} />
+        <ChartContainer {&data} params={}>
+            <Grid {&data} params={} />
+            <XAxis {&data} params={} />
+            <YAxis {&data} params={} />
+            <Line {&data} params={} />
             <Legend {&data} />
             <Tooltip {&data} />
         </ChartContainer>

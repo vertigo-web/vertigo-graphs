@@ -1,16 +1,27 @@
 use crate::types::{GRID_DIVISIONS, GraphData};
 use vertigo::{component, computed_tuple, dom};
 
+/// Options for [`XAxis`].
+#[derive(Clone)]
+pub struct XAxisParams {
+    /// Line color. Default: `"black"`.
+    pub stroke: String,
+}
+
+impl Default for XAxisParams {
+    fn default() -> Self {
+        Self {
+            stroke: "black".to_string(),
+        }
+    }
+}
+
 /// Renders the horizontal X axis with evenly spaced tick marks.
 ///
-/// `stroke` sets the line color; defaults to `"black"` when empty.
+/// See [`XAxisParams`] for the options.
 #[component]
-pub fn XAxis(data: GraphData, stroke: String) {
-    let stroke = if stroke.is_empty() {
-        "black".to_string()
-    } else {
-        stroke
-    };
+pub fn XAxis(data: GraphData, params: XAxisParams) {
+    let XAxisParams { stroke } = params;
     let d = computed_tuple!(w => &data.scale_x, h => &data.scale_y).map(|(w, h)| {
         let mut s = format!("M0,{h} L{w},{h} ");
         for i in 0..=GRID_DIVISIONS {

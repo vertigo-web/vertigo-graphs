@@ -1,7 +1,8 @@
 use vertigo::{Computed, DomNode, dom};
 use vertigo_graphs::{
-    ChartContainer, FillGradient, GradientKind, GraphData, Grid, GridKind, Line, LineKind, XAxis,
-    YAxis,
+    ChartContainer, ChartContainerParams, FillGradient, FillGradientParams, GradientKind,
+    GraphData, Grid, GridKind, GridParams, Line, LineKind, LineParams, XAxis, XAxisParams, YAxis,
+    YAxisParams,
 };
 
 pub fn render() -> DomNode {
@@ -56,16 +57,39 @@ pub fn render() -> DomNode {
         }),
     };
 
+    let container = ChartContainerParams {
+        padding_x: 50.0,
+        padding_y: 10.0,
+        background: "black".into(),
+    };
+    let grid = GridParams {
+        kind: GridKind::YOnly,
+        ..Default::default()
+    };
+    let x_axis = XAxisParams {
+        stroke: "white".into(),
+    };
+    let y_axis = YAxisParams {
+        stroke: "white".into(),
+        values: true,
+        ..Default::default()
+    };
+    let line = LineParams {
+        kind: LineKind::Rounded,
+        color: "rgba(24,243,243,1)".into(),
+    };
+    let fill = FillGradientParams {
+        kind: GradientKind::Linear("rgba(24,243,243,0.3)", "rgba(24,243,243,0.0)"),
+        line_kind: LineKind::Rounded,
+    };
+
     dom! {
-        <ChartContainer {&data} padding_x={50} padding_y={10} background="black">
-            <Grid {&data} kind={GridKind::YOnly} stroke={} />
-            <XAxis {&data} stroke="white" />
-            <YAxis {&data} stroke="white" values={true} decimals={} value_scale={} labels_only={} />
-            <Line {&data} color="rgba(24,243,243,1)" kind={LineKind::Rounded} />
-            <FillGradient {&data}
-                line_kind={LineKind::Rounded}
-                kind={GradientKind::Linear("rgba(24,243,243,0.3)", "rgba(24,243,243,0.0)")}
-            />
+        <ChartContainer {&data} params={container}>
+            <Grid {&data} params={grid} />
+            <XAxis {&data} params={x_axis} />
+            <YAxis {&data} params={y_axis} />
+            <Line {&data} params={line} />
+            <FillGradient {&data} params={fill} />
         </ChartContainer>
     }
 }

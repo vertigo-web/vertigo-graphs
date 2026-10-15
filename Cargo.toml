@@ -19,8 +19,8 @@ exclude = ["/.github", "/gradient_graph.png"]
 [dependencies]
 vertigo = "0.13"
 
-# [patch.crates-io]
-# vertigo = { git = "https://github.com/vertigo-web/vertigo", branch = "prepare-0.13.0" }
+[patch.crates-io]
+vertigo = { git = "https://github.com/vertigo-web/vertigo", branch = "default-parameters" }
 # vertigo-forms = { git = "https://github.com/vertigo-web/vertigo-forms", branch = "prepare-0.2.1" }
 # vertigo = { path = "../vertigo/crates/vertigo" }
 # vertigo-forms = { path = "../vertigo-forms" }

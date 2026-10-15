@@ -11,21 +11,34 @@ pub enum LineKind {
     Rounded,
 }
 
+/// Options for [`Line`].
+#[derive(Clone)]
+pub struct LineParams {
+    /// Straight segments or a smooth curve. Default: [`LineKind::Straight`].
+    pub kind: LineKind,
+    /// Stroke color. Default: `"steelblue"`.
+    pub color: String,
+}
+
+impl Default for LineParams {
+    fn default() -> Self {
+        Self {
+            kind: LineKind::default(),
+            color: "steelblue".to_string(),
+        }
+    }
+}
+
 /// Renders the data series as a stroked SVG path.
 ///
-/// - `kind` — straight segments or smooth curve (default: `LineKind::Straight`).
-/// - `color` — stroke color; defaults to `"steelblue"` when empty.
+/// See [`LineParams`] for the options.
 #[component]
-pub fn Line(data: GraphData, kind: LineKind, color: String) {
-    let stroke = if color.is_empty() {
-        "steelblue".to_string()
-    } else {
-        color
-    };
+pub fn Line(data: GraphData, params: LineParams) {
+    let LineParams { kind, color } = params;
     let d = computed_tuple!(pts => &data.points, h => &data.scale_y)
         .map(move |(pts, h)| build_line_path(&pts, h, &kind));
     dom! {
-        <path d={d} fill="none" {stroke} stroke-width="2" />
+        <path d={d} fill="none" stroke={color} stroke-width="2" />
     }
 }
 

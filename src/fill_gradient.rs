@@ -1,17 +1,18 @@
+use std::sync::atomic::{AtomicUsize, Ordering};
+
 use crate::line::{LineKind, build_line_path};
 use crate::types::GraphData;
-use vertigo::{Computed, component, computed_tuple, dom};
+use vertigo::{component, computed_tuple, dom};
 
 /// Gradient style for [`FillGradient`].
 #[derive(Clone)]
 pub enum GradientKind {
-    /// Vertical linear gradient from `top_color` (opaque) to `bottom_color` (transparent).
-    ///
-    /// Because Vertigo's `dom!` macro lowercases SVG element names (breaking `<linearGradient>`),
-    /// the gradient is implemented via a CSS `mask-image`; `bottom_color` is therefore ignored
-    /// and the fade is always to fully transparent.
+    /// Vertical linear gradient from the first color (top) to the second color (bottom).
     Linear(&'static str, &'static str),
 }
+
+/// Source of document-unique gradient ids, as `url(#id)` references are page-wide.
+static NEXT_GRADIENT_ID: AtomicUsize = AtomicUsize::new(0);
 
 /// Renders a filled area beneath the data series with a vertical gradient fade.
 ///
@@ -19,15 +20,24 @@ pub enum GradientKind {
 /// ensuring the fill aligns visually with the stroke.
 #[component]
 pub fn FillGradient(data: GraphData, kind: GradientKind, line_kind: LineKind) {
-    let (color_top, color_bottom) = match kind {
-        GradientKind::Linear(top, bottom) => (top, bottom),
-    };
-    let fill = Computed::from(move |_| color_top.trim_end_matches(';').to_string());
-    let _ = color_bottom;
+    let GradientKind::Linear(color_top, color_bottom) = kind;
+    let id = format!(
+        "vertigo-graphs-fill-{}",
+        NEXT_GRADIENT_ID.fetch_add(1, Ordering::Relaxed)
+    );
+    let fill = format!("url(#{id})");
     let d = computed_tuple!(pts => &data.points, h => &data.scale_y)
         .map(move |(pts, h)| build_fill_path(&pts, h, &line_kind));
     dom! {
-        <path d={d} fill={fill} stroke="none" style="mask-image: linear-gradient(to bottom, black, transparent); -webkit-mask-image: linear-gradient(to bottom, black, transparent)" />
+        <g>
+            <defs>
+                <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color={color_top} />
+                    <stop offset="1" stop-color={color_bottom} />
+                </linearGradient>
+            </defs>
+            <path d={d} fill={fill} stroke="none" />
+        </g>
     }
 }
 
@@ -64,5 +74,40 @@ mod tests {
         let pts = [(0.0, 2.0), (5.0, 9.0), (10.0, 4.0)];
         let line = build_line_path(&pts, 10.0, &LineKind::Rounded);
         assert!(build_fill_path(&pts, 10.0, &LineKind::Rounded).starts_with(&line));
+    }
+
+    #[test]
+    fn each_instance_references_its_own_gradient() {
+        use vertigo::Computed;
+        use vertigo::dev::inspect::{DomDebugFragment, log_start};
+
+        let data = GraphData {
+            label: Computed::from(|_| "Chart".to_string()),
+            scale_x: Computed::from(|_| 10.0),
+            scale_y: Computed::from(|_| 10.0),
+            points: Computed::from(|_| vec![(0.0, 2.0), (10.0, 4.0)]),
+        };
+
+        log_start();
+        let _el = dom! {
+            <g>
+                <FillGradient {&data} kind={GradientKind::Linear("red", "blue")} line_kind={} />
+                <FillGradient {&data} kind={GradientKind::Linear("red", "blue")} line_kind={} />
+            </g>
+        };
+
+        let html = DomDebugFragment::from_log().to_pseudo_html();
+        let ids: Vec<&str> = html
+            .split("id='")
+            .skip(1)
+            .map(|rest| rest.split('\'').next().unwrap())
+            .collect();
+        assert_eq!(ids.len(), 2, "{html}");
+        assert_ne!(ids[0], ids[1], "{html}");
+        for id in ids {
+            assert!(html.contains(&format!("fill='url(#{id})'")), "{html}");
+        }
+        assert!(html.contains("stop-color='red'"), "{html}");
+        assert!(html.contains("stop-color='blue'"), "{html}");
     }
 }

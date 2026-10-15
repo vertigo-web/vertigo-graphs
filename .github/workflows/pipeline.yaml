@@ -15,6 +15,48 @@ env:
 
 jobs:
 
+  stable:
+    name: Stable fmt + clippy + tests + docs + wasm32 build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      SCCACHE_GHA_CACHE_NAME: "stable"
+    steps:
+      - uses: actions/checkout@v6
+      - uses: mozilla-actions/sccache-action@v0.0.9
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: "deps-cache-stable"
+          cache-targets: "false" # IMPORTANT: Let sccache handle target artifacts
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          target: wasm32-unknown-unknown
+          components: clippy, rustfmt
+
+      # Formatting check
+      - name: Check formatting
+        run: cargo fmt -- --check
+
+      # Clippy checks (plain cargo so warnings fail the job)
+      - name: Clippy (stable)
+        run: cargo clippy --all --all-features --tests --locked
+
+      # Unit tests and README doctests
+      - name: Unit tests
+        run: cargo test --all --all-features --locked
+
+      # Docs (broken intra-doc links fail the job)
+      - name: Docs
+        run: cargo doc --no-deps --all-features --locked
+        env:
+          RUSTDOCFLAGS: -D warnings
+
+      # Build library and storybook for the browser
+      - name: Build wasm32
+        run: cargo build --all --all-features --target wasm32-unknown-unknown --locked
+
   nightly:
     name: Nightly fmt + clippy + tests
     runs-on: ubuntu-latest

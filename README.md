@@ -83,17 +83,21 @@ pub fn render() -> DomNode {
     };
 
     dom! {
-        <ChartContainer {&data} padding_x={} padding_y={} background={}>
-            <Grid {&data} kind={} stroke={} />
-            <XAxis {&data} stroke={} />
-            <YAxis {&data} stroke={} values={} decimals={} value_scale={} labels_only={} />
-            <Line {&data} color={} kind={} />
+        <ChartContainer {&data} params={}>
+            <Grid {&data} params={} />
+            <XAxis {&data} params={} />
+            <YAxis {&data} params={} />
+            <Line {&data} params={} />
             <Legend {&data} />
             <Tooltip {&data} />
         </ChartContainer>
     }
 }
 ```
+
+Building blocks take their options as a `params` struct (`ChartContainerParams`, `YAxisParams`, …).
+`params={}` uses the defaults; to change some of them, set those fields and fill in the rest with
+`..Default::default()`, f. ex. `params={YAxisParams { values: true, ..Default::default() }}`.
 
 ## Storybook App
 

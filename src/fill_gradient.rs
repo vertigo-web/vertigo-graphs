@@ -11,15 +11,38 @@ pub enum GradientKind {
     Linear(&'static str, &'static str),
 }
 
+/// Options for [`FillGradient`].
+#[derive(Clone)]
+pub struct FillGradientParams {
+    /// Gradient colors. Default: steelblue (the default [`Line`](crate::Line) color)
+    /// fading from 30 % opacity at the top to transparent at the bottom.
+    pub kind: GradientKind,
+    /// Shape of the top edge. Use the same value as the matching
+    /// [`LineParams::kind`](crate::LineParams::kind) so the fill lines up with the stroke.
+    /// Default: [`LineKind::Straight`].
+    pub line_kind: LineKind,
+}
+
+impl Default for FillGradientParams {
+    fn default() -> Self {
+        Self {
+            kind: GradientKind::Linear("rgba(70,130,180,0.3)", "rgba(70,130,180,0)"),
+            line_kind: LineKind::default(),
+        }
+    }
+}
+
 /// Source of document-unique gradient ids, as `url(#id)` references are page-wide.
 static NEXT_GRADIENT_ID: AtomicUsize = AtomicUsize::new(0);
 
 /// Renders a filled area beneath the data series with a vertical gradient fade.
 ///
-/// The top edge follows the same curve as [`Line`](crate::Line) when the same `line_kind` is used,
-/// ensuring the fill aligns visually with the stroke.
+/// The top edge follows the same curve as [`Line`](crate::Line) when
+/// [`FillGradientParams::line_kind`] matches the line's kind, ensuring the fill aligns
+/// visually with the stroke. See [`FillGradientParams`] for the options.
 #[component]
-pub fn FillGradient(data: GraphData, kind: GradientKind, line_kind: LineKind) {
+pub fn FillGradient(data: GraphData, params: FillGradientParams) {
+    let FillGradientParams { kind, line_kind } = params;
     let GradientKind::Linear(color_top, color_bottom) = kind;
     let id = format!(
         "vertigo-graphs-fill-{}",
@@ -87,12 +110,16 @@ mod tests {
             scale_y: Computed::from(|_| 10.0),
             points: Computed::from(|_| vec![(0.0, 2.0), (10.0, 4.0)]),
         };
+        let params = FillGradientParams {
+            kind: GradientKind::Linear("red", "blue"),
+            ..Default::default()
+        };
 
         log_start();
         let _el = dom! {
             <g>
-                <FillGradient {&data} kind={GradientKind::Linear("red", "blue")} line_kind={} />
-                <FillGradient {&data} kind={GradientKind::Linear("red", "blue")} line_kind={} />
+                <FillGradient {&data} params={params.clone()} />
+                <FillGradient {&data} {params} />
             </g>
         };
 

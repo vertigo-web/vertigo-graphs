@@ -74,3 +74,74 @@ pub fn build_line_path(pts: &[(f64, f64)], h: f64, kind: &LineKind) -> String {
     }
     s
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Splits a rounded path into `[start, cp1, cp2, end]` cubic segments.
+    fn cubic_segments(path: &str) -> Vec<[(f64, f64); 4]> {
+        fn point(s: &str) -> (f64, f64) {
+            let (x, y) = s.split_once(',').unwrap();
+            (x.parse().unwrap(), y.parse().unwrap())
+        }
+        let mut parts = path.strip_prefix('M').unwrap().split(" C");
+        let mut start = point(parts.next().unwrap());
+        parts
+            .map(|part| {
+                let pts: Vec<_> = part.split(' ').map(point).collect();
+                let segment = [start, pts[0], pts[1], pts[2]];
+                start = pts[2];
+                segment
+            })
+            .collect()
+    }
+
+    #[test]
+    fn empty_points_give_empty_path() {
+        assert_eq!(build_line_path(&[], 10.0, &LineKind::Straight), "");
+        assert_eq!(build_line_path(&[], 10.0, &LineKind::Rounded), "");
+    }
+
+    #[test]
+    fn straight_flips_y_axis() {
+        let pts = [(0.0, 0.0), (5.0, 10.0), (10.0, 4.0)];
+        assert_eq!(
+            build_line_path(&pts, 10.0, &LineKind::Straight),
+            "M0,10 L5,0 L10,6"
+        );
+    }
+
+    #[test]
+    fn rounded_single_point_is_just_a_move() {
+        assert_eq!(
+            build_line_path(&[(3.0, 2.0)], 10.0, &LineKind::Rounded),
+            "M3,8"
+        );
+    }
+
+    #[test]
+    fn rounded_passes_through_every_point() {
+        let pts = [(0.0, 0.0), (5.0, 10.0), (10.0, 4.0), (20.0, 7.0)];
+        let segments = cubic_segments(&build_line_path(&pts, 10.0, &LineKind::Rounded));
+        assert_eq!(segments.len(), pts.len() - 1);
+        for (segment, pair) in segments.iter().zip(pts.windows(2)) {
+            assert_eq!(segment[0], (pair[0].0, 10.0 - pair[0].1));
+            assert_eq!(segment[3], (pair[1].0, 10.0 - pair[1].1));
+        }
+    }
+
+    #[test]
+    fn rounded_control_points_stay_within_segment_x_range() {
+        // Uneven spacing makes raw Catmull-Rom tangents overshoot along X.
+        let pts = [(0.0, 0.0), (1.0, 10.0), (100.0, 0.0), (101.0, 10.0)];
+        let path = build_line_path(&pts, 10.0, &LineKind::Rounded);
+        for [start, cp1, cp2, end] in cubic_segments(&path) {
+            let range = start.0..=end.0;
+            assert!(
+                range.contains(&cp1.0) && range.contains(&cp2.0),
+                "control points {cp1:?} {cp2:?} outside {range:?}"
+            );
+        }
+    }
+}

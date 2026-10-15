@@ -3,7 +3,7 @@ use vertigo::{component, computed_tuple, dom};
 
 /// Simple all-in-one line chart (single straight-line series, no axis components).
 ///
-/// For composable charts with axes, grid, and multiple layers use [`ChartContainer`] instead.
+/// For composable charts with axes, grid, and multiple layers use [`ChartContainer`](crate::ChartContainer) instead.
 #[component]
 pub fn Graph(data: GraphData) {
     let path = computed_tuple!(points => &data.points, scale_y => &data.scale_y).map(

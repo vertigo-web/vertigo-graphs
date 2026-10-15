@@ -29,3 +29,30 @@ pub fn ChartContainer(data: GraphData, children: Vec<DomNode>, padding_x: f64, b
         </div>
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use vertigo::dev::inspect::{DomDebugFragment, log_start};
+
+    #[test]
+    fn padding_widens_svg_to_match_view_box() {
+        let data = GraphData {
+            label: Computed::from(|_| "Chart".to_string()),
+            scale_x: Computed::from(|_| 500.0),
+            scale_y: Computed::from(|_| 400.0),
+            points: Computed::from(|_| vec![]),
+        };
+
+        log_start();
+        let _el = dom! {
+            <ChartContainer {&data} padding_x={50.0} background={}>
+                <g />
+            </ChartContainer>
+        };
+
+        let html = DomDebugFragment::from_log().to_pseudo_html();
+        assert!(html.contains("viewBox='-50 0 600 400'"), "{html}");
+        assert!(html.contains("width='600'"), "{html}");
+    }
+}

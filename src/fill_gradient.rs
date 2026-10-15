@@ -40,3 +40,29 @@ fn build_fill_path(pts: &[(f64, f64)], h: f64, line_kind: &LineKind) -> String {
     let line = build_line_path(pts, h, line_kind);
     format!("{line} L{last_x},{h} L{first_x},{h} Z")
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn empty_points_give_empty_path() {
+        assert_eq!(build_fill_path(&[], 10.0, &LineKind::Straight), "");
+    }
+
+    #[test]
+    fn fill_closes_along_the_baseline() {
+        let pts = [(0.0, 2.0), (10.0, 4.0)];
+        assert_eq!(
+            build_fill_path(&pts, 10.0, &LineKind::Straight),
+            "M0,8 L10,6 L10,10 L0,10 Z"
+        );
+    }
+
+    #[test]
+    fn top_edge_matches_line() {
+        let pts = [(0.0, 2.0), (5.0, 9.0), (10.0, 4.0)];
+        let line = build_line_path(&pts, 10.0, &LineKind::Rounded);
+        assert!(build_fill_path(&pts, 10.0, &LineKind::Rounded).starts_with(&line));
+    }
+}

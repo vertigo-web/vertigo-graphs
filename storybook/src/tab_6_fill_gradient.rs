@@ -57,7 +57,7 @@ pub fn render() -> DomNode {
     };
 
     dom! {
-        <ChartContainer {&data} padding_x={50} background="black">
+        <ChartContainer {&data} padding_x={50} padding_y={10} background="black">
             <Grid {&data} kind={GridKind::YOnly} stroke={} />
             <XAxis {&data} stroke="white" />
             <YAxis {&data} stroke="white" values={true} decimals={} value_scale={} labels_only={} />

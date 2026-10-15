@@ -19,7 +19,7 @@ pub fn render() -> DomNode {
     };
 
     dom! {
-        <ChartContainer {&data} padding_x={} background={}>
+        <ChartContainer {&data} padding_x={} padding_y={} background={}>
             <Grid {&data} kind={} stroke={} />
             <XAxis {&data} stroke={} />
             <YAxis {&data} stroke={} values={} decimals={} value_scale={} labels_only={} />

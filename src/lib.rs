@@ -21,3 +21,8 @@ pub use tooltip::*;
 pub use types::*;
 pub use x_axis::*;
 pub use y_axis::*;
+
+// Compile README examples as doctests so they can't drift from the API.
+#[cfg(doctest)]
+#[doc = include_str!("../README.md")]
+struct ReadmeDoctests;

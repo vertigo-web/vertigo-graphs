@@ -7,12 +7,29 @@ use vertigo::{Computed, DomNode, component, computed_tuple, dom};
 /// - `padding_x` — extra horizontal space added on each side of the SVG viewBox
 ///   so edge elements (e.g. wide bars) are not clipped by the Y axis.
 ///   The SVG element widens by the same amount, so the chart keeps its 1:1 scale.
+/// - `padding_y` — extra vertical space added above and below the SVG viewBox
+///   so edge elements (e.g. top and bottom Y axis labels) are not clipped.
+///   The SVG element grows by the same amount.
 /// - `background` — optional CSS background value; omit or pass empty string for none.
 #[component]
-pub fn ChartContainer(data: GraphData, children: Vec<DomNode>, padding_x: f64, background: String) {
+pub fn ChartContainer(
+    data: GraphData,
+    children: Vec<DomNode>,
+    padding_x: f64,
+    padding_y: f64,
+    background: String,
+) {
     let width = data.scale_x.map(move |w| w + 2.0 * padding_x);
-    let view_box = computed_tuple!(w => &data.scale_x, h => &data.scale_y)
-        .map(move |(w, h)| format!("{} 0 {} {}", -padding_x, w + 2.0 * padding_x, h));
+    let height = data.scale_y.map(move |h| h + 2.0 * padding_y);
+    let view_box = computed_tuple!(w => &data.scale_x, h => &data.scale_y).map(move |(w, h)| {
+        format!(
+            "{} {} {} {}",
+            -padding_x,
+            -padding_y,
+            w + 2.0 * padding_x,
+            h + 2.0 * padding_y
+        )
+    });
     let style = Computed::from(move |_| {
         if background.is_empty() {
             "border: 1px solid #ccc".to_string()
@@ -23,7 +40,7 @@ pub fn ChartContainer(data: GraphData, children: Vec<DomNode>, padding_x: f64, b
     dom! {
         <div>
             <p>{data.label}</p>
-            <svg width={width} height={data.scale_y} viewBox={view_box} style={style}>
+            <svg width={width} height={height} viewBox={view_box} style={style}>
                 {..children}
             </svg>
         </div>
@@ -36,7 +53,7 @@ mod tests {
     use vertigo::dev::inspect::{DomDebugFragment, log_start};
 
     #[test]
-    fn padding_widens_svg_to_match_view_box() {
+    fn padding_grows_svg_to_match_view_box() {
         let data = GraphData {
             label: Computed::from(|_| "Chart".to_string()),
             scale_x: Computed::from(|_| 500.0),
@@ -46,13 +63,14 @@ mod tests {
 
         log_start();
         let _el = dom! {
-            <ChartContainer {&data} padding_x={50.0} background={}>
+            <ChartContainer {&data} padding_x={50.0} padding_y={10.0} background={}>
                 <g />
             </ChartContainer>
         };
 
         let html = DomDebugFragment::from_log().to_pseudo_html();
-        assert!(html.contains("viewBox='-50 0 600 400'"), "{html}");
+        assert!(html.contains("viewBox='-50 -10 600 420'"), "{html}");
         assert!(html.contains("width='600'"), "{html}");
+        assert!(html.contains("height='420'"), "{html}");
     }
 }

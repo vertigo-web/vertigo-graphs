@@ -1,30 +1,52 @@
 use crate::types::{GRID_DIVISIONS, GraphData};
 use vertigo::{component, dom};
 
+/// Options for [`YAxis`].
+#[derive(Clone)]
+pub struct YAxisParams {
+    /// Line and label color. Default: `"black"`.
+    pub stroke: String,
+    /// When `true`, prints numeric value labels to the left of each tick. Default: `false`.
+    ///
+    /// The labels stick out of the plot to the left, and the top and bottom ones above
+    /// and below it, so give the chart room for them with
+    /// [`ChartContainerParams`](crate::ChartContainerParams)'s `padding_x` and `padding_y`.
+    pub values: bool,
+    /// Number of decimal places to use when formatting `values` labels. Default: `0`.
+    pub decimals: u32,
+    /// If positive, overrides `data.scale_y` for label *values* only (tick positions
+    /// still use `data.scale_y`). Lets callers scale the plot to SVG pixels while
+    /// displaying labels in domain units. Default: `0.0`, which uses `data.scale_y`.
+    pub value_scale: f64,
+    /// When `true`, omits the axis line and tick marks and only renders the value labels
+    /// (requires `values` to have any effect). Default: `false`.
+    pub labels_only: bool,
+}
+
+impl Default for YAxisParams {
+    fn default() -> Self {
+        Self {
+            stroke: "black".to_string(),
+            values: false,
+            decimals: 0,
+            value_scale: 0.0,
+            labels_only: false,
+        }
+    }
+}
+
 /// Renders the vertical Y axis with evenly spaced tick marks and optional value labels.
 ///
-/// - `stroke` — line and label color; defaults to `"black"` when empty.
-/// - `values` — when `true`, prints numeric value labels to the left of each tick.
-/// - `decimals` — number of decimal places to use when formatting `values` labels.
-/// - `value_scale` — if positive, overrides `data.scale_y` for label *values*
-///   only (tick positions still use `data.scale_y`). Lets callers scale the
-///   plot to SVG pixels while displaying labels in domain units.
-/// - `labels_only` — when `true`, omits the axis line and tick marks and only
-///   renders the value labels (requires `values = true` to have any effect).
+/// See [`YAxisParams`] for the options.
 #[component]
-pub fn YAxis(
-    data: GraphData,
-    stroke: String,
-    values: bool,
-    decimals: u32,
-    value_scale: f64,
-    labels_only: bool,
-) {
-    let stroke = if stroke.is_empty() {
-        "black".to_string()
-    } else {
-        stroke
-    };
+pub fn YAxis(data: GraphData, params: YAxisParams) {
+    let YAxisParams {
+        stroke,
+        values,
+        decimals,
+        value_scale,
+        labels_only,
+    } = params;
     if values {
         let fill = stroke.clone();
         let precision = decimals as usize;
@@ -73,5 +95,61 @@ pub fn YAxis(
         dom! {
             <path d={d} fill="none" stroke-width="1" {stroke} />
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use vertigo::Computed;
+    use vertigo::dev::inspect::{DomDebugFragment, log_start};
+
+    fn render(params: YAxisParams) -> String {
+        let data = GraphData {
+            label: Computed::from(|_| "Chart".to_string()),
+            scale_x: Computed::from(|_| 500.0),
+            scale_y: Computed::from(|_| 500.0),
+            points: Computed::from(|_| vec![]),
+        };
+
+        log_start();
+        let _el = dom! { <YAxis {&data} {params} /> };
+        DomDebugFragment::from_log().to_pseudo_html()
+    }
+
+    #[test]
+    fn defaults_draw_black_axis_without_labels() {
+        let html = render(YAxisParams::default());
+        assert!(html.contains("<path"), "{html}");
+        assert!(html.contains("stroke='black'"), "{html}");
+        assert!(!html.contains("<text"), "{html}");
+    }
+
+    #[test]
+    fn labels_use_decimals_and_value_scale() {
+        let html = render(YAxisParams {
+            values: true,
+            decimals: 1,
+            value_scale: 10.0,
+            ..Default::default()
+        });
+        assert!(html.contains("<path"), "{html}");
+        for label in ["10.0", "8.0", "2.0", "0.0"] {
+            assert!(
+                html.contains(&format!(">{label}</text>")),
+                "{label}: {html}"
+            );
+        }
+    }
+
+    #[test]
+    fn labels_only_drops_axis_line() {
+        let html = render(YAxisParams {
+            values: true,
+            labels_only: true,
+            ..Default::default()
+        });
+        assert!(!html.contains("<path"), "{html}");
+        assert!(html.contains(">500</text>"), "{html}");
     }
 }

@@ -11,16 +11,30 @@ pub enum GridKind {
     YOnly,
 }
 
+/// Options for [`Grid`].
+#[derive(Clone)]
+pub struct GridParams {
+    /// Which grid lines to draw. Default: [`GridKind::Both`].
+    pub kind: GridKind,
+    /// Line color. Default: `"#e0e0e0"` (light gray).
+    pub stroke: String,
+}
+
+impl Default for GridParams {
+    fn default() -> Self {
+        Self {
+            kind: GridKind::default(),
+            stroke: "#e0e0e0".to_string(),
+        }
+    }
+}
+
 /// Renders background grid lines at evenly spaced tick positions.
 ///
-/// - `stroke` — line color; defaults to `"#e0e0e0"` (light gray) when empty.
+/// See [`GridParams`] for the options.
 #[component]
-pub fn Grid(data: GraphData, kind: GridKind, stroke: String) {
-    let stroke = if stroke.is_empty() {
-        "#e0e0e0".to_string()
-    } else {
-        stroke
-    };
+pub fn Grid(data: GraphData, params: GridParams) {
+    let GridParams { kind, stroke } = params;
     let d = computed_tuple!(w => &data.scale_x, h => &data.scale_y).map(move |(w, h)| {
         let mut s = String::new();
         // Iterate through every tick position so the top and bottom rows

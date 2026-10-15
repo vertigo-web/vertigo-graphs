@@ -12,13 +12,38 @@ pub enum BarKind {
     Rounded(f64),
 }
 
+/// Options for [`Bar`].
+#[derive(Clone)]
+pub struct BarParams {
+    /// Corner style. Default: [`BarKind::Straight`].
+    pub kind: BarKind,
+}
+
+impl BarParams {
+    /// The defaults as a constant, so [`Bar`] can declare them for `{..}`.
+    pub const DEFAULT: Self = Self {
+        kind: BarKind::Straight,
+    };
+}
+
+impl Default for BarParams {
+    fn default() -> Self {
+        Self::DEFAULT
+    }
+}
+
 /// Renders the data series as a vertical bar chart.
 ///
 /// Bar width is 80 % of the minimum spacing between distinct x positions
 /// (points may come in any order), or 80 % of the chart width when all points
 /// share one x position. Bars with `y ≤ 0` are skipped.
+///
+/// See [`BarParams`] for the options. `params={}` gives the defaults; where vertigo
+/// supports default props (nightly, `#![feature(default_field_values)]` in the crate
+/// using it), `params` can also be left out with `{..}`.
 #[component]
-pub fn Bar(data: GraphData, kind: BarKind) {
+pub fn Bar(data: GraphData, #[default = BarParams::DEFAULT] params: BarParams) {
+    let BarParams { kind } = params;
     let d = computed_tuple!(pts => &data.points, w => &data.scale_x, h => &data.scale_y)
         .map(move |(pts, w, h)| build_bar_path(&pts, w, h, &kind));
     dom! {

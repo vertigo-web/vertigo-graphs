@@ -15,7 +15,7 @@ pub enum GradientKind {
 
 /// Renders a filled area beneath the data series with a vertical gradient fade.
 ///
-/// The top edge follows the same curve as [`Line`] when the same `line_kind` is used,
+/// The top edge follows the same curve as [`Line`](crate::Line) when the same `line_kind` is used,
 /// ensuring the fill aligns visually with the stroke.
 #[component]
 pub fn FillGradient(data: GraphData, kind: GradientKind, line_kind: LineKind) {

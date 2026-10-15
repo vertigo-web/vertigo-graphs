@@ -1,7 +1,7 @@
 use crate::types::GraphData;
 use vertigo::{component, computed_tuple, dom};
 
-/// Interpolation style for the [`Line`] and [`FillGradient`] components.
+/// Interpolation style for the [`Line`] and [`FillGradient`](crate::FillGradient) components.
 #[derive(Clone, Default)]
 pub enum LineKind {
     /// Connect points with straight segments.

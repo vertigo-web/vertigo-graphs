@@ -6,3 +6,6 @@
 ### Added
 
 * `Graph` component
+* `GraphData` - data shared by all chart components
+* Building blocks for composed charts: `ChartContainer`, `Grid`, `XAxis`, `YAxis`, `Line`, `Bar`, `FillGradient`,
+  `Legend` and `Tooltip`

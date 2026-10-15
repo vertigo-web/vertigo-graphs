@@ -6,9 +6,11 @@ use vertigo::{Computed, DomNode, component, computed_tuple, dom};
 /// - `children` — chart layer components (Grid, Axes, Line, Bar, …).
 /// - `padding_x` — extra horizontal space added on each side of the SVG viewBox
 ///   so edge elements (e.g. wide bars) are not clipped by the Y axis.
+///   The SVG element widens by the same amount, so the chart keeps its 1:1 scale.
 /// - `background` — optional CSS background value; omit or pass empty string for none.
 #[component]
 pub fn ChartContainer(data: GraphData, children: Vec<DomNode>, padding_x: f64, background: String) {
+    let width = data.scale_x.map(move |w| w + 2.0 * padding_x);
     let view_box = computed_tuple!(w => &data.scale_x, h => &data.scale_y)
         .map(move |(w, h)| format!("{} 0 {} {}", -padding_x, w + 2.0 * padding_x, h));
     let style = Computed::from(move |_| {
@@ -21,7 +23,7 @@ pub fn ChartContainer(data: GraphData, children: Vec<DomNode>, padding_x: f64, b
     dom! {
         <div>
             <p>{data.label}</p>
-            <svg width={data.scale_x} height={data.scale_y} viewBox={view_box} style={style}>
+            <svg width={width} height={data.scale_y} viewBox={view_box} style={style}>
                 {..children}
             </svg>
         </div>

@@ -14,8 +14,9 @@ pub enum BarKind {
 
 /// Renders the data series as a vertical bar chart.
 ///
-/// Bar width is 80 % of the minimum x-spacing between adjacent points.
-/// Bars with `y ≤ 0` are skipped.
+/// Bar width is 80 % of the minimum spacing between distinct x positions
+/// (points may come in any order), or 80 % of the chart width when all points
+/// share one x position. Bars with `y ≤ 0` are skipped.
 #[component]
 pub fn Bar(data: GraphData, kind: BarKind) {
     let d = computed_tuple!(pts => &data.points, w => &data.scale_x, h => &data.scale_y)
@@ -29,12 +30,17 @@ fn build_bar_path(pts: &[(f64, f64)], w: f64, h: f64, kind: &BarKind) -> String 
     if pts.is_empty() {
         return String::new();
     }
-    let bar_width = if pts.len() < 2 {
+    // Measure gaps between sorted, distinct x positions so unsorted input
+    // or duplicate x values don't shrink bars to zero width.
+    let mut xs: Vec<f64> = pts.iter().map(|&(x, _)| x).collect();
+    xs.sort_by(f64::total_cmp);
+    xs.dedup();
+    let bar_width = if xs.len() < 2 {
         w * 0.8
     } else {
-        let min_spacing = pts
+        let min_spacing = xs
             .windows(2)
-            .map(|p| (p[1].0 - p[0].0).abs())
+            .map(|p| p[1] - p[0])
             .fold(f64::INFINITY, f64::min);
         min_spacing * 0.8
     };
@@ -82,6 +88,26 @@ mod tests {
         assert_eq!(
             build_bar_path(&pts, 20.0, 10.0, &BarKind::Straight),
             "M-2,10 V9 H2 V10 Z M8,10 V9 H12 V10 Z M13,10 V9 H17 V10 Z "
+        );
+    }
+
+    #[test]
+    fn unsorted_points_use_min_spacing_of_sorted_positions() {
+        // Sorted positions 0, 5, 10 → min spacing 5 → width 4.
+        let pts = [(10.0, 1.0), (0.0, 1.0), (5.0, 1.0)];
+        assert_eq!(
+            build_bar_path(&pts, 20.0, 10.0, &BarKind::Straight),
+            "M8,10 V9 H12 V10 Z M-2,10 V9 H2 V10 Z M3,10 V9 H7 V10 Z "
+        );
+    }
+
+    #[test]
+    fn duplicate_x_does_not_collapse_bar_width() {
+        // Positions 0, 0, 10 → distinct spacing 10 → width 8.
+        let pts = [(0.0, 1.0), (0.0, 2.0), (10.0, 1.0)];
+        assert_eq!(
+            build_bar_path(&pts, 20.0, 10.0, &BarKind::Straight),
+            "M-4,10 V9 H4 V10 Z M-4,10 V8 H4 V10 Z M6,10 V9 H14 V10 Z "
         );
     }
 

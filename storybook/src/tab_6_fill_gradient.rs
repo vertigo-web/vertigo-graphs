@@ -64,7 +64,7 @@ pub fn render() -> DomNode {
             <Line {&data} color="rgba(24,243,243,1)" kind={LineKind::Rounded} />
             <FillGradient {&data}
                 line_kind={LineKind::Rounded}
-                kind={GradientKind::Linear("rgba(24,243,243,0.3);", "rgba(24,243,243,0.0);")}
+                kind={GradientKind::Linear("rgba(24,243,243,0.3)", "rgba(24,243,243,0.0)")}
             />
         </ChartContainer>
     }

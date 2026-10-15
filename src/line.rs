@@ -29,7 +29,7 @@ pub fn Line(data: GraphData, kind: LineKind, color: String) {
     }
 }
 
-pub fn build_line_path(pts: &[(f64, f64)], h: f64, kind: &LineKind) -> String {
+pub(crate) fn build_line_path(pts: &[(f64, f64)], h: f64, kind: &LineKind) -> String {
     if pts.is_empty() {
         return String::new();
     }

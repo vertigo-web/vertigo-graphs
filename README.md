@@ -84,9 +84,9 @@ pub fn render() -> DomNode {
 
     dom! {
         <ChartContainer {&data} padding_x={} background={}>
-            <Grid {&data} kind={} />
+            <Grid {&data} kind={} stroke={} />
             <XAxis {&data} stroke={} />
-            <YAxis {&data} stroke={} values={} />
+            <YAxis {&data} stroke={} values={} decimals={} value_scale={} labels_only={} />
             <Line {&data} color={} kind={} />
             <Legend {&data} />
             <Tooltip {&data} />

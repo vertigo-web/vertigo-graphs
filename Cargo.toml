@@ -17,10 +17,10 @@ edition = "2024"
 exclude = ["/.github", "/gradient_graph.png"]
 
 [dependencies]
-vertigo = "0.13"
+vertigo = "0.14"
 
-[patch.crates-io]
-vertigo = { git = "https://github.com/vertigo-web/vertigo", branch = "default-parameters" }
+#[patch.crates-io]
+#vertigo = { git = "https://github.com/vertigo-web/vertigo", branch = "default-parameters" }
 # vertigo-forms = { git = "https://github.com/vertigo-web/vertigo-forms", branch = "prepare-0.2.1" }
 # vertigo = { path = "../vertigo/crates/vertigo" }
 # vertigo-forms = { path = "../vertigo-forms" }

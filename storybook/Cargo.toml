@@ -9,6 +9,6 @@ publish = false
 crate-type = ["cdylib"]
 
 [dependencies]
-vertigo = "0.13"
+vertigo = "0.14"
 vertigo-forms = "0.2"
 vertigo-graphs = { path = ".." }

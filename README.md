@@ -99,6 +99,9 @@ Building blocks take their options as a `params` struct (`ChartContainerParams`,
 `params={}` uses the defaults; to change some of them, set those fields and fill in the rest with
 `..Default::default()`, f. ex. `params={YAxisParams { values: true, ..Default::default() }}`.
 
+For round Y axis labels, `nice_ticks(max, 5)` picks the axis's top value and steps. Scale the points by its
+`max` and pass its `divisions` to both `YAxisParams` and `GridParams` (`y_divisions`).
+
 ## Storybook App
 
 ### Prepare

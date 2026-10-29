@@ -21,6 +21,11 @@ pub struct YAxisParams {
     /// When `true`, omits the axis line and tick marks and only renders the value labels
     /// (requires `values` to have any effect). Default: `false`.
     pub labels_only: bool,
+    /// How many steps the axis is divided into, with a tick and a label at each step's ends.
+    /// 0 counts as 1. Default: [`GRID_DIVISIONS`]. [`nice_ticks`](crate::nice_ticks) picks it
+    /// with `value_scale` and `decimals` for round labels, and [`GridParams`](crate::GridParams)'s
+    /// `y_divisions` keeps the grid lines on the ticks.
+    pub divisions: usize,
 }
 
 impl Default for YAxisParams {
@@ -31,6 +36,7 @@ impl Default for YAxisParams {
             decimals: 0,
             value_scale: 0.0,
             labels_only: false,
+            divisions: GRID_DIVISIONS,
         }
     }
 }
@@ -46,15 +52,17 @@ pub fn YAxis(data: GraphData, params: YAxisParams) {
         decimals,
         value_scale,
         labels_only,
+        divisions,
     } = params;
+    let divisions = divisions.max(1);
     if values {
         let fill = stroke.clone();
         let precision = decimals as usize;
         let labels = data.scale_y.render_value(move |h| {
             let label_scale = if value_scale > 0.0 { value_scale } else { h };
-            let nodes = (0..=GRID_DIVISIONS).map(|i| {
-                let ty = h * (i as f64 / GRID_DIVISIONS as f64) + 4.0;
-                let val = label_scale * ((GRID_DIVISIONS - i) as f64 / GRID_DIVISIONS as f64);
+            let nodes = (0..=divisions).map(|i| {
+                let ty = h * (i as f64 / divisions as f64) + 4.0;
+                let val = label_scale * ((divisions - i) as f64 / divisions as f64);
                 let text = format!("{:.*}", precision, val);
                 let fc = fill.clone();
                 dom! {
@@ -66,10 +74,10 @@ pub fn YAxis(data: GraphData, params: YAxisParams) {
         if labels_only {
             dom! { <g>{labels}</g> }
         } else {
-            let d = data.scale_y.map(|h| {
+            let d = data.scale_y.map(move |h| {
                 let mut s = format!("M0,0 L0,{h} ");
-                for i in 0..=GRID_DIVISIONS {
-                    let y = h * (i as f64 / GRID_DIVISIONS as f64);
+                for i in 0..=divisions {
+                    let y = h * (i as f64 / divisions as f64);
                     s.push_str(&format!("M0,{y} L6,{y} "));
                 }
                 s
@@ -84,10 +92,10 @@ pub fn YAxis(data: GraphData, params: YAxisParams) {
     } else if labels_only {
         dom! { <g /> }
     } else {
-        let d = data.scale_y.map(|h| {
+        let d = data.scale_y.map(move |h| {
             let mut s = format!("M0,0 L0,{h} ");
-            for i in 0..=GRID_DIVISIONS {
-                let y = h * (i as f64 / GRID_DIVISIONS as f64);
+            for i in 0..=divisions {
+                let y = h * (i as f64 / divisions as f64);
                 s.push_str(&format!("M0,{y} L6,{y} "));
             }
             s
@@ -140,6 +148,26 @@ mod tests {
                 "{label}: {html}"
             );
         }
+    }
+
+    #[test]
+    fn divisions_set_the_labels() {
+        let html = render(YAxisParams {
+            values: true,
+            value_scale: 60.0,
+            divisions: 6,
+            ..Default::default()
+        });
+        let labels = html.matches("<text").count();
+        assert_eq!(labels, 7, "{html}");
+        for label in ["60", "50", "10", "0"] {
+            assert!(
+                html.contains(&format!(">{label}</text>")),
+                "{label}: {html}"
+            );
+        }
+        // The axis line plus a tick at each label
+        assert_eq!(html.matches(" L6,").count(), 7, "{html}");
     }
 
     #[test]
